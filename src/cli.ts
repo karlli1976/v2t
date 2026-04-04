@@ -5,6 +5,13 @@ import { download } from './downloader.js';
 import { transcribe } from './transcriber/index.js';
 import { writeOutputs } from './formatter.js';
 
+function toBackend(v: string | undefined): 'local' | 'openai' | undefined {
+  if (v === undefined) return undefined;
+  if (v === 'local' || v === 'openai') return v;
+  process.stderr.write(`Error: --backend must be "local" or "openai", got "${v}"\n`);
+  process.exit(1);
+}
+
 const program = new Command();
 
 program
@@ -26,15 +33,10 @@ program
     const config = resolveConfig({
       language:     opts.language,
       model:        opts.model,
-      backend:      opts.backend as 'local' | 'openai' | undefined,
+      backend:      toBackend(opts.backend),
       outputDir:    opts.output,
       openaiApiKey: opts.apiKey,
     });
-
-    if (opts.backend !== undefined && opts.backend !== 'local' && opts.backend !== 'openai') {
-      process.stderr.write(`Error: --backend must be "local" or "openai", got "${opts.backend}"\n`);
-      process.exit(1);
-    }
 
     process.stderr.write(`Downloading: ${url}\n`);
     const { audioPath, title, cleanup } = download(url);

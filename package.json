@@ -12,6 +12,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "postbuild": "node -e \"import('fs').then(m => m.chmodSync('dist/cli.js', '755')).catch(()=>{})\"",
     "dev": "tsx src/cli.ts",
     "test": "vitest run",
     "test:watch": "vitest"

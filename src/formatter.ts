@@ -17,11 +17,14 @@ function toSrtTimestamp(seconds: number): string {
   return `${pad(h, 2)}:${pad(m, 2)}:${pad(s, 2)},${pad(ms, 3)}`;
 }
 
-export function writeOutputs(segments: Segment[], outputDir: string, baseName: string): void {
+export function writeOutputs(segments: Segment[], outputDir: string, baseName: string): { txtPath: string; srtPath: string } {
   fs.mkdirSync(outputDir, { recursive: true });
 
+  const txtPath = path.join(outputDir, `${baseName}.txt`);
+  const srtPath = path.join(outputDir, `${baseName}.srt`);
+
   const txt = segments.map(s => s.text.trim()).join('\n');
-  fs.writeFileSync(path.join(outputDir, `${baseName}.txt`), txt, 'utf-8');
+  fs.writeFileSync(txtPath, txt, 'utf-8');
 
   const srt = segments.length === 0
     ? ''
@@ -30,5 +33,7 @@ export function writeOutputs(segments: Segment[], outputDir: string, baseName: s
           `${i + 1}\n${toSrtTimestamp(s.start)} --> ${toSrtTimestamp(s.end)}\n${s.text.trim()}`
         )
         .join('\n\n') + '\n\n';
-  fs.writeFileSync(path.join(outputDir, `${baseName}.srt`), srt, 'utf-8');
+  fs.writeFileSync(srtPath, srt, 'utf-8');
+
+  return { txtPath, srtPath };
 }

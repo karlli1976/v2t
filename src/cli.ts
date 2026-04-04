@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import * as fs from 'fs';
-import * as path from 'path';
 import { resolveConfig } from './config.js';
 import { download } from './downloader.js';
 import { transcribe } from './transcriber/index.js';
@@ -33,6 +31,11 @@ program
       openaiApiKey: opts.apiKey,
     });
 
+    if (opts.backend !== undefined && opts.backend !== 'local' && opts.backend !== 'openai') {
+      process.stderr.write(`Error: --backend must be "local" or "openai", got "${opts.backend}"\n`);
+      process.exit(1);
+    }
+
     process.stderr.write(`Downloading: ${url}\n`);
     const { audioPath, title, cleanup } = download(url);
 
@@ -40,10 +43,7 @@ program
       process.stderr.write(`Transcribing with backend: ${config.backend}\n`);
       const segments = await transcribe(audioPath, config);
 
-      writeOutputs(segments, config.outputDir, title);
-
-      const txtPath = path.join(config.outputDir, `${title}.txt`);
-      const srtPath = path.join(config.outputDir, `${title}.srt`);
+      const { txtPath, srtPath } = writeOutputs(segments, config.outputDir, title);
       process.stderr.write('Done.\n');
       console.log(txtPath);
       console.log(srtPath);
@@ -52,7 +52,7 @@ program
     }
   });
 
-program.parseAsync(process.argv).catch((err: Error) => {
-  process.stderr.write(`Error: ${err.message}\n`);
+program.parseAsync(process.argv).catch((err: unknown) => {
+  process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`);
   process.exit(1);
 });

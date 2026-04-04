@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
-import * as os from 'os';
 
 // We'll mock the fs.existsSync and fs.readFileSync used inside config.ts
 // to control what the "config file" contains in each test.
@@ -12,6 +11,10 @@ describe('resolveConfig', () => {
     delete process.env.OPENAI_API_KEY;
   });
 
+  afterEach(() => {
+    delete process.env.OPENAI_API_KEY;
+  });
+
   it('returns hardcoded defaults when no config file or flags', async () => {
     vi.spyOn(fs, 'existsSync').mockReturnValue(false);
     const { resolveConfig } = await import('./config.js');
@@ -19,6 +22,7 @@ describe('resolveConfig', () => {
     expect(result.language).toBe('zh');
     expect(result.model).toBe('turbo');
     expect(result.backend).toBe('local');
+    expect(result.outputDir).toBe(process.cwd());
     expect(result.openaiApiKey).toBeUndefined();
   });
 

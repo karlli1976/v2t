@@ -5,12 +5,11 @@ import type { Config, ResolvedConfig } from './types.js';
 
 const CONFIG_PATH = path.join(os.homedir(), '.v2t.json');
 
-const DEFAULTS: ResolvedConfig = {
+const DEFAULTS = {
   language: 'zh',
   model: 'turbo',
   backend: 'local',
-  outputDir: process.cwd(),
-};
+} as const;
 
 export function loadConfig(): Config {
   if (!fs.existsSync(CONFIG_PATH)) return {};
@@ -29,7 +28,7 @@ export function resolveConfig(cliFlags: Partial<ResolvedConfig>): ResolvedConfig
     language:     cliFlags.language    ?? fileConfig.language    ?? DEFAULTS.language,
     model:        cliFlags.model       ?? fileConfig.model       ?? DEFAULTS.model,
     backend:      cliFlags.backend     ?? fileConfig.backend     ?? DEFAULTS.backend,
-    outputDir:    cliFlags.outputDir   ?? fileConfig.outputDir   ?? DEFAULTS.outputDir,
+    outputDir:    cliFlags.outputDir   ?? fileConfig.outputDir   ?? process.cwd(),
     openaiApiKey: cliFlags.openaiApiKey ?? fileConfig.openaiApiKey ?? envApiKey,
   };
 }

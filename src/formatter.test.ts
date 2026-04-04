@@ -51,4 +51,15 @@ describe('writeOutputs', () => {
       expect(fs.readFileSync(path.join(dir, 'empty.srt'), 'utf-8')).toBe('');
     });
   });
+
+  it('handles timestamp where ms rounds to 1000 without overflow', () => {
+    withTmpDir(dir => {
+      const segments: Segment[] = [
+        { start: 0.9995, end: 1.9995, text: 'Edge case' },
+      ];
+      writeOutputs(segments, dir, 'test');
+      const srt = fs.readFileSync(path.join(dir, 'test.srt'), 'utf-8');
+      expect(srt).toContain('00:00:01,000 --> 00:00:02,000');
+    });
+  });
 });

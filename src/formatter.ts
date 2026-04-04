@@ -2,20 +2,19 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type { Segment } from './types.js';
 
-function pad2(n: number): string {
-  return String(Math.floor(n)).padStart(2, '0');
-}
-
-function pad3(n: number): string {
-  return String(Math.round(n)).padStart(3, '0');
+function pad(n: number, width: number): string {
+  return String(n).padStart(width, '0');
 }
 
 function toSrtTimestamp(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-  const ms = Math.round((seconds % 1) * 1000);
-  return `${pad2(h)}:${pad2(m)}:${pad2(s)},${pad3(ms)}`;
+  const totalMs = Math.round(seconds * 1000);
+  const ms = totalMs % 1000;
+  const totalSec = Math.floor(totalMs / 1000);
+  const s = totalSec % 60;
+  const totalMin = Math.floor(totalSec / 60);
+  const m = totalMin % 60;
+  const h = Math.floor(totalMin / 60);
+  return `${pad(h, 2)}:${pad(m, 2)}:${pad(s, 2)},${pad(ms, 3)}`;
 }
 
 export function writeOutputs(segments: Segment[], outputDir: string, baseName: string): void {
@@ -30,6 +29,6 @@ export function writeOutputs(segments: Segment[], outputDir: string, baseName: s
         .map((s, i) =>
           `${i + 1}\n${toSrtTimestamp(s.start)} --> ${toSrtTimestamp(s.end)}\n${s.text.trim()}`
         )
-        .join('\n\n');
+        .join('\n\n') + '\n\n';
   fs.writeFileSync(path.join(outputDir, `${baseName}.srt`), srt, 'utf-8');
 }

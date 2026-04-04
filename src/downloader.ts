@@ -11,7 +11,9 @@ export interface DownloadResult {
 
 function sanitizeFilename(name: string): string {
   return name
+    .replace(/[\x00-\x1f\x7f]/g, '-')
     .replace(/[\\/:*?"<>|]/g, '-')
+    .replace(/-+/g, '-')
     .trim()
     .slice(0, 200) || 'untitled';
 }
@@ -22,7 +24,7 @@ function fallbackTitle(): string {
 
 function checkYtDlp(): void {
   const result = spawnSync('yt-dlp', ['--version'], { encoding: 'utf-8' });
-  if (result.error) {
+  if (result.error || result.status !== 0) {
     throw new Error(
       'yt-dlp not found on PATH.\n' +
       'Install it: https://github.com/yt-dlp/yt-dlp#installation\n' +

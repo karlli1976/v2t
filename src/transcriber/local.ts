@@ -6,7 +6,7 @@ import type { Segment } from '../types.js';
 
 function checkWhisper(): void {
   const result = spawnSync('whisper', ['--help'], { encoding: 'utf-8' });
-  if (result.error) {
+  if (result.error || result.status !== 0) {
     throw new Error(
       'whisper not found on PATH.\n' +
       'Install it: pip install openai-whisper\n' +
@@ -40,10 +40,10 @@ export function transcribeLocal(
     const baseName = path.basename(audioPath, path.extname(audioPath));
     const jsonPath = path.join(outDir, `${baseName}.json`);
     const raw = JSON.parse(fs.readFileSync(jsonPath, 'utf-8')) as {
-      segments: Array<{ start: number; end: number; text: string }>;
+      segments?: Array<{ start: number; end: number; text: string }>;
     };
 
-    return raw.segments.map(s => ({ start: s.start, end: s.end, text: s.text }));
+    return (raw.segments ?? []).map(s => ({ start: s.start, end: s.end, text: s.text }));
   } finally {
     fs.rmSync(outDir, { recursive: true, force: true });
   }

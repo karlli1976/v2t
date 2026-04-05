@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
-const CONFIG_PATH = path.join(os.homedir(), '.v2t.json');
+const CONFIG_PATH = path.join(process.cwd(), '.v2t.json');
 const DEFAULTS = {
     language: 'zh',
     model: 'turbo',

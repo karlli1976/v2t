@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
 import type { Config, ResolvedConfig } from './types.js';
 
-const CONFIG_PATH = path.join(os.homedir(), '.v2t.json');
+const CONFIG_PATH = path.join(process.cwd(), '.v2t.json');
 
 const DEFAULTS = {
   language: 'zh',

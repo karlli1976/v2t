@@ -42,7 +42,7 @@ export function transcribeLocal(
         '--output_dir', outDir,
         '--output_format', 'json',
       ],
-      { stdio: ['ignore', 'pipe', 'ignore'] }
+      { stdio: ['ignore', 'pipe', 'ignore'], env: { ...process.env, PYTHONUNBUFFERED: '1' } }
     );
 
     // Whisper writes lines like: [00:00.000 --> 00:03.500]  text

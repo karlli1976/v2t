@@ -4,29 +4,7 @@ import { resolveConfig } from './config.js';
 import { download } from './downloader.js';
 import { transcribe } from './transcriber/index.js';
 import { writeOutputs } from './formatter.js';
-
-// ── display helpers ────────────────────────────────────────────────────────
-
-function fmt(sec: number): string {
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-}
-
-function elapsed(ms: number): string {
-  return `${(ms / 1000).toFixed(1)}s`;
-}
-
-function progressBar(current: number, total: number | null): string {
-  const W = 24;
-  if (total && total > 0) {
-    const pct = Math.min(current / total, 1);
-    const filled = Math.round(pct * W);
-    const bar = '█'.repeat(filled) + '░'.repeat(W - filled);
-    return `[${bar}] ${String(Math.round(pct * 100)).padStart(3)}%  ${fmt(current)} / ${fmt(total)}`;
-  }
-  return fmt(current);
-}
+import { fmt, elapsed, progressBar } from './display.js';
 
 // ── backend validation ─────────────────────────────────────────────────────
 
@@ -75,6 +53,8 @@ program
     // ── stage 2: transcribe ────────────────────────────────────────────────
     try {
       const t1 = Date.now();
+
+      process.stderr.write('Transcribing...\r');
 
       const onProgress = (currentSec: number) => {
         process.stderr.write(`\rTranscribing  ${progressBar(currentSec, durationSec)}   `);

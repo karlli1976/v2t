@@ -3,3 +3,5 @@ node_modules/
 .idea/
 test-output/
 transcripts/
+/log/
+/cache/

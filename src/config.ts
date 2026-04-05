@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import type { Config, ResolvedConfig } from './types.js';
 
 const CONFIG_PATH = path.join(process.cwd(), '.v2t.json');
@@ -8,6 +8,7 @@ const DEFAULTS = {
   language: 'zh',
   model: 'turbo',
   backend: 'local',
+  cacheDir: 'cache',
 } as const;
 
 export function loadConfig(): Config {
@@ -28,6 +29,7 @@ export function resolveConfig(cliFlags: Partial<ResolvedConfig>): ResolvedConfig
     model:        cliFlags.model       ?? fileConfig.model       ?? DEFAULTS.model,
     backend:      cliFlags.backend     ?? fileConfig.backend     ?? DEFAULTS.backend,
     outputDir:    path.resolve(cliFlags.outputDir ?? fileConfig.outputDir ?? 'transcripts'),
+    cacheDir:     path.resolve(cliFlags.cacheDir   ?? fileConfig.cacheDir   ?? DEFAULTS.cacheDir),
     openaiApiKey: cliFlags.openaiApiKey ?? fileConfig.openaiApiKey ?? envApiKey,
   };
 }

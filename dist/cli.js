@@ -36,9 +36,9 @@ program
     // ── stage 1: download ──────────────────────────────────────────────────
     process.stderr.write('Downloading...\r');
     const t0 = Date.now();
-    const { audioPath, title, durationSec, cleanup } = download(url);
+    const { audioPath, title, durationSec, cleanup, cached } = download(url, config.cacheDir);
     const downloadMs = Date.now() - t0;
-    process.stderr.write(`✓ Download        ${elapsed(downloadMs)}\n`);
+    process.stderr.write(`✓ Download        ${cached ? '(cached)' : elapsed(downloadMs)}\n`);
     // ── stage 2: transcribe ────────────────────────────────────────────────
     try {
         const t1 = Date.now();
@@ -60,7 +60,10 @@ program
         cleanup();
     }
 });
-program.parseAsync(process.argv).catch((err) => {
+try {
+    await program.parseAsync(process.argv);
+}
+catch (err) {
     process.stderr.write(`\nError: ${err instanceof Error ? err.message : String(err)}\n`);
     process.exit(1);
-});
+}

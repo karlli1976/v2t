@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "postbuild": "node -e \"import('fs').then(m => m.chmodSync('dist/cli.js', '755')).catch(()=>{})\"",
+    "postbuild": "node -e \"import('fs').then(m => { m.chmodSync('dist/cli.js', '755'); m.cpSync('src/transcriber/faster_whisper_run.py', 'dist/transcriber/faster_whisper_run.py'); }).catch(()=>{})\"",
     "dev": "tsx src/cli.ts",
     "test": "vitest run",
     "test:watch": "vitest"

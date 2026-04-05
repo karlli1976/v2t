@@ -9,6 +9,7 @@ export interface Config {
   model?: string;
   backend?: 'local' | 'openai';
   outputDir?: string;
+  cacheDir?: string;
   openaiApiKey?: string;
 }
 
@@ -17,5 +18,6 @@ export interface ResolvedConfig {
   model: string;
   backend: 'local' | 'openai';
   outputDir: string;
+  cacheDir: string;
   openaiApiKey?: string;
 }

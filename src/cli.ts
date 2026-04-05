@@ -4,7 +4,7 @@ import { resolveConfig } from './config.js';
 import { download } from './downloader.js';
 import { transcribe } from './transcriber/index.js';
 import { writeOutputs } from './formatter.js';
-import { fmt, elapsed, progressBar } from './display.js';
+import {  elapsed, progressBar } from './display.js';
 
 // ── backend validation ─────────────────────────────────────────────────────
 
@@ -46,9 +46,9 @@ program
     // ── stage 1: download ──────────────────────────────────────────────────
     process.stderr.write('Downloading...\r');
     const t0 = Date.now();
-    const { audioPath, title, durationSec, cleanup } = download(url);
+    const { audioPath, title, durationSec, cleanup, cached } = download(url, config.cacheDir);
     const downloadMs = Date.now() - t0;
-    process.stderr.write(`✓ Download        ${elapsed(downloadMs)}\n`);
+    process.stderr.write(`✓ Download        ${cached ? '(cached)' : elapsed(downloadMs)}\n`);
 
     // ── stage 2: transcribe ────────────────────────────────────────────────
     try {
@@ -76,7 +76,9 @@ program
     }
   });
 
-program.parseAsync(process.argv).catch((err: unknown) => {
+try {
+  await program.parseAsync(process.argv);
+} catch (err: unknown) {
   process.stderr.write(`\nError: ${err instanceof Error ? err.message : String(err)}\n`);
   process.exit(1);
-});
+}

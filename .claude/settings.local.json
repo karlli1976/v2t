@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vitest:*)",
+      "Bash(node:*)",
+      "Bash(python:*)",
+      "Bash(nvidia-smi)",
+      "Bash(pip install:*)",
+      "Bash(cat:*)",
+      "Bash(npm run:*)",
+      "Bash(faster-whisper --help)",
+      "Bash(pip show:*)"
+    ]
+  }
+}

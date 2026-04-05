@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import * as fs from 'fs';
-export async function transcribeOpenAI(audioPath, language, apiKey) {
+export async function transcribeOpenAI(audioPath, language, apiKey, _onProgress) {
     const client = new OpenAI({ apiKey });
     const response = await client.audio.transcriptions.create({
         file: fs.createReadStream(audioPath),

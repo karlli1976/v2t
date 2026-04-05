@@ -13,6 +13,16 @@ function sanitizeFilename(name) {
 function fallbackTitle() {
     return new Date().toISOString().replace(/[:.]/g, '-');
 }
+function parseDuration(s) {
+    const parts = s.trim().split(':').map(Number);
+    if (!parts.length || parts.some(isNaN))
+        return null;
+    if (parts.length === 2)
+        return parts[0] * 60 + parts[1];
+    if (parts.length === 3)
+        return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    return null;
+}
 function checkYtDlp() {
     const result = spawnSync('yt-dlp', ['--version'], { encoding: 'utf-8' });
     if (result.error || result.status !== 0) {
@@ -28,10 +38,11 @@ export function download(url) {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'v2t-'));
     const cleanup = () => fs.rmSync(tmpDir, { recursive: true, force: true });
     let title;
+    let durationSec = null;
     try {
-        title = sanitizeFilename(execFileSync('yt-dlp', ['--get-title', '--no-playlist', url], {
-            encoding: 'utf-8',
-        }).trim());
+        const lines = execFileSync('yt-dlp', ['--get-title', '--get-duration', '--no-playlist', url], { encoding: 'utf-8' }).trim().split('\n');
+        title = sanitizeFilename(lines[0] ?? '');
+        durationSec = parseDuration(lines[1] ?? '');
     }
     catch {
         title = fallbackTitle();
@@ -43,7 +54,7 @@ export function download(url) {
             '--no-playlist',
             '-o', path.join(tmpDir, 'audio.%(ext)s'),
             url,
-        ], { stdio: ['ignore', 'inherit', 'inherit'] });
+        ], { stdio: 'ignore' });
     }
     catch (err) {
         cleanup();
@@ -54,5 +65,5 @@ export function download(url) {
         cleanup();
         throw new Error(`Download succeeded but audio file not found at: ${audioPath}`);
     }
-    return { audioPath, title, cleanup };
+    return { audioPath, title, durationSec, cleanup };
 }

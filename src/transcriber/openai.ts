@@ -5,7 +5,8 @@ import type { Segment } from '../types.js';
 export async function transcribeOpenAI(
   audioPath: string,
   language: string,
-  apiKey: string
+  apiKey: string,
+  _onProgress?: (currentSec: number) => void
 ): Promise<Segment[]> {
   const client = new OpenAI({ apiKey });
 

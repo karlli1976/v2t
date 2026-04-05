@@ -4,6 +4,26 @@ import { resolveConfig } from './config.js';
 import { download } from './downloader.js';
 import { transcribe } from './transcriber/index.js';
 import { writeOutputs } from './formatter.js';
+// ── display helpers ────────────────────────────────────────────────────────
+function fmt(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+function elapsed(ms) {
+    return `${(ms / 1000).toFixed(1)}s`;
+}
+function progressBar(current, total) {
+    const W = 24;
+    if (total && total > 0) {
+        const pct = Math.min(current / total, 1);
+        const filled = Math.round(pct * W);
+        const bar = '█'.repeat(filled) + '░'.repeat(W - filled);
+        return `[${bar}] ${String(Math.round(pct * 100)).padStart(3)}%  ${fmt(current)} / ${fmt(total)}`;
+    }
+    return fmt(current);
+}
+// ── backend validation ─────────────────────────────────────────────────────
 function toBackend(v) {
     if (v === undefined)
         return undefined;
@@ -12,6 +32,7 @@ function toBackend(v) {
     process.stderr.write(`Error: --backend must be "local" or "openai", got "${v}"\n`);
     process.exit(1);
 }
+// ── cli ────────────────────────────────────────────────────────────────────
 const program = new Command();
 program
     .name('v2t')
@@ -30,13 +51,25 @@ program
         outputDir: opts.output,
         openaiApiKey: opts.apiKey,
     });
-    process.stderr.write(`Downloading: ${url}\n`);
-    const { audioPath, title, cleanup } = download(url);
+    // ── stage 1: download ──────────────────────────────────────────────────
+    process.stderr.write('Downloading...\r');
+    const t0 = Date.now();
+    const { audioPath, title, durationSec, cleanup } = download(url);
+    const downloadMs = Date.now() - t0;
+    process.stderr.write(`✓ Download        ${elapsed(downloadMs)}\n`);
+    // ── stage 2: transcribe ────────────────────────────────────────────────
     try {
-        process.stderr.write(`Transcribing with backend: ${config.backend}\n`);
-        const segments = await transcribe(audioPath, config);
+        const t1 = Date.now();
+        const onProgress = (currentSec) => {
+            process.stderr.write(`\rTranscribing  ${progressBar(currentSec, durationSec)}   `);
+        };
+        const segments = await transcribe(audioPath, config, onProgress);
+        const transcribeMs = Date.now() - t1;
+        // clear progress line, print summary
+        process.stderr.write(`\r✓ Transcription   ${elapsed(transcribeMs)}\n`);
+        // ── write output ───────────────────────────────────────────────────
         const { txtPath, srtPath } = writeOutputs(segments, config.outputDir, title);
-        process.stderr.write('Done.\n');
+        process.stderr.write('\n');
         console.log(txtPath);
         console.log(srtPath);
     }
@@ -45,6 +78,6 @@ program
     }
 });
 program.parseAsync(process.argv).catch((err) => {
-    process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`);
+    process.stderr.write(`\nError: ${err instanceof Error ? err.message : String(err)}\n`);
     process.exit(1);
 });

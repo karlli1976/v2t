@@ -1,5 +1,6 @@
 {
   "language": "zh",
   "model": "turbo",
-  "backend": "local"
+  "backend": "local",
+  "outputDir": "./transcripts"
 }

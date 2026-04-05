@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
+import * as path from 'path';
 
 // We'll mock the fs.existsSync and fs.readFileSync used inside config.ts
 // to control what the "config file" contains in each test.
@@ -22,7 +23,7 @@ describe('resolveConfig', () => {
     expect(result.language).toBe('zh');
     expect(result.model).toBe('turbo');
     expect(result.backend).toBe('local');
-    expect(result.outputDir).toBe(process.cwd());
+    expect(result.outputDir).toBe(path.join(process.cwd(), 'transcripts'));
     expect(result.openaiApiKey).toBeUndefined();
   });
 

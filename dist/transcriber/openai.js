@@ -9,6 +9,8 @@ export async function transcribeOpenAI(audioPath, language, apiKey) {
         response_format: 'verbose_json',
         timestamp_granularities: ['segment'],
     });
+    // The openai SDK types do not expose `segments` on the verbose_json response;
+    // the field is present at runtime when timestamp_granularities includes 'segment'.
     const segments = response.segments ?? [];
     return segments.map(s => ({ start: s.start, end: s.end, text: s.text }));
 }

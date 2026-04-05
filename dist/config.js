@@ -24,7 +24,7 @@ export function resolveConfig(cliFlags) {
         language: cliFlags.language ?? fileConfig.language ?? DEFAULTS.language,
         model: cliFlags.model ?? fileConfig.model ?? DEFAULTS.model,
         backend: cliFlags.backend ?? fileConfig.backend ?? DEFAULTS.backend,
-        outputDir: cliFlags.outputDir ?? fileConfig.outputDir ?? process.cwd(),
+        outputDir: cliFlags.outputDir ?? fileConfig.outputDir ?? path.join(process.cwd(), 'transcripts'),
         openaiApiKey: cliFlags.openaiApiKey ?? fileConfig.openaiApiKey ?? envApiKey,
     };
 }
